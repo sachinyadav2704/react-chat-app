@@ -1,0 +1,42 @@
+react-chat-app
+├── backend
+│   ├── .env
+│   ├── models
+│   │   ├── Group.js
+│   │   ├── Message.js
+│   │   └── User.js
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── routes
+│   │   ├── authRoutes.js
+│   │   └── chat.js
+│   └── server.js
+└── frontend
+    ├── .gitignore
+    ├── eslint.config.js
+    ├── index.html
+    ├── package-lock.json
+    ├── package.json
+    ├── public
+    │   └── vite.svg
+    ├── README.md
+    ├── src
+    │   ├── App.css
+    │   ├── App.jsx
+    │   ├── assets
+    │   │   └── react.svg
+    │   ├── components
+    │   ├── contexts
+    │   │   └── ChatContexts.jsx
+    │   ├── folderstructures.txt
+    │   ├── index.css
+    │   ├── main.jsx
+    │   ├── pages
+    │   │   ├── ChatRoom.jsx
+    │   │   └── Login.jsx
+    │   ├── routes.jsx
+    │   ├── services
+    │   ├── styles
+    │   │   └── global.css
+    │   └── utils
+    └── vite.config.js
