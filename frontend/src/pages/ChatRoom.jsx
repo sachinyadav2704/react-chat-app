@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Button, List, Typography, Select, message } from 'antd';
+import { Input, Button, List, Typography, Select, message, Modal } from 'antd';
 import { io } from 'socket.io-client';
+import { LuSend } from 'react-icons/lu';
+import { IoMdLogOut } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
@@ -17,6 +19,9 @@ const ChatRoom = () => {
    const [chatrooms, setChatrooms] = useState([]);
    const [selectedChatroom, setSelectedChatroom] = useState('global');
    const [isModalVisible, setIsModalVisible] = useState(false);
+   const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+   const [password, setPassword] = useState('');
+   const [chatroomToJoin, setChatroomToJoin] = useState(null);
    const navigate = useNavigate();
 
    useEffect(() => {
@@ -101,18 +106,56 @@ const ChatRoom = () => {
    };
 
    const handleChatroomChange = async value => {
-      setSelectedChatroom(value);
-      setMessages([]); // Clear messages when switching chatrooms
+      const selectedRoom = chatrooms.find(room => room._id === value);
+      if (selectedRoom && selectedRoom.type === 'private') {
+         setChatroomToJoin(value);
+         setIsPasswordModalVisible(true);
+      } else {
+         setSelectedChatroom(value);
+         setMessages([]); // Clear messages when switching chatrooms
 
-      try {
-         const response = await axios.get(`http://localhost:5000/api/chat/${value}`);
-         setMessages(response.data);
-      } catch (error) {
-         console.error('Error fetching messages:', error);
+         try {
+            const response = await axios.get(`http://localhost:5000/api/chat/${value}`);
+            setMessages(response.data);
+         } catch (error) {
+            console.error('Error fetching messages:', error);
+         }
+
+         if (socket) {
+            socket.emit('join-room', value); // Notify the server to join the new chatroom
+         }
       }
+   };
 
-      if (socket) {
-         socket.emit('join-room', value); // Notify the server to join the new chatroom
+   const handlePasswordSubmit = async () => {
+      try {
+         const response = await axios.post(`http://localhost:5000/api/chatrooms/verify-password`, {
+            chatroomId: chatroomToJoin,
+            password,
+         });
+
+         if (response.data.success) {
+            setSelectedChatroom(chatroomToJoin);
+            setMessages([]); // Clear messages when switching chatrooms
+
+            try {
+               const response = await axios.get(`http://localhost:5000/api/chat/${chatroomToJoin}`);
+               setMessages(response.data);
+            } catch (error) {
+               console.error('Error fetching messages:', error);
+            }
+
+            if (socket) {
+               socket.emit('join-room', chatroomToJoin); // Notify the server to join the new chatroom
+            }
+
+            setIsPasswordModalVisible(false);
+            setPassword('');
+         } else {
+            message.error('Incorrect password');
+         }
+      } catch (error) {
+         message.error('Failed to verify password');
       }
    };
 
@@ -127,7 +170,7 @@ const ChatRoom = () => {
          </Button>
          <CreateChatroomModal visible={isModalVisible} onClose={() => setIsModalVisible(false)} onChatroomCreated={handleChatroomCreated} />
          <Button onClick={handleLogout} style={styles.logoutButton}>
-            Logout
+            Logout <IoMdLogOut />
          </Button>
          <div style={styles.header}>
             <Select defaultValue={selectedChatroom} style={styles.chatroomSelect} onChange={handleChatroomChange}>
@@ -164,9 +207,12 @@ const ChatRoom = () => {
                style={styles.input}
             />
             <Button type="primary" onClick={handleSendMessage} style={styles.sendButton}>
-               Send
+               Send <LuSend />
             </Button>
          </div>
+         <Modal title="Enter Password" visible={isPasswordModalVisible} onCancel={() => setIsPasswordModalVisible(false)} onOk={handlePasswordSubmit}>
+            <Input.Password placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+         </Modal>
       </div>
    );
 };
@@ -176,7 +222,7 @@ const styles = {
       padding: '20px',
       maxWidth: '600px',
       margin: '0 auto',
-      height: '80vh',
+      height: '100vh',
       display: 'flex',
       flexDirection: 'column',
    },

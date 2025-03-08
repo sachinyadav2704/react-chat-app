@@ -15,36 +15,32 @@ const Login = () => {
    };
 
    const onLoginFinish = async values => {
-      await axios
-         .post('http://localhost:5000/api/auth/login', values)
-         .then(response => {
-            console.log('Login Response: ' + response);
-            const { user, token } = response.data;
-            localStorage.setItem('userId', user._id); // Store user ID
-            localStorage.setItem('userName', user.userName); // Store userName
-            localStorage.setItem('token', token); // Optional, for authentication
-            message.success('Login successful!');
-            navigate('/chat'); // Redirect to chat page
-         })
-         .catch(error => {
-            console.error('Login error: ', error);
-            message.error('Login failed, please try again.');
-         });
+      try {
+         const response = await axios.post('http://localhost:5000/api/auth/login', values);
+         console.log('Login Response: ', response);
+         const { user, token } = response.data;
+         localStorage.setItem('userId', user._id); // Store user ID
+         localStorage.setItem('userName', user.userName); // Store userName
+         localStorage.setItem('token', token); // Optional, for authentication
+         message.success('Login successful!');
+         navigate('/chat'); // Redirect to chat page
+      } catch (error) {
+         console.error('Login error: ', error);
+         message.error('Login failed, please try again.');
+      }
    };
 
    const onSignupFinish = async values => {
       delete values.confirmPassword;
-      await axios
-         .post('http://localhost:5000/api/auth/signup', values)
-         .then(response => {
-            console.log('Sign up Response: ' + response);
-            setActiveTab('login');
-            message.success(response?.data?.message);
-         })
-         .catch(error => {
-            console.error('Signup error: ', error);
-            message.error(error?.response?.data?.message || 'Sign up failed! Please try again');
-         });
+      try {
+         const response = await axios.post('http://localhost:5000/api/auth/signup', values);
+         console.log('Sign up Response: ', response);
+         setActiveTab('login');
+         message.success(response?.data?.message);
+      } catch (error) {
+         console.error('Signup error: ', error);
+         message.error(error?.response?.data?.message || 'Sign up failed! Please try again');
+      }
    };
 
    return (

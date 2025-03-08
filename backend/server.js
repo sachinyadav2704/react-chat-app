@@ -72,6 +72,7 @@ io.on('connection', socket => {
 
 // Import routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/chatrooms', require('./routes/chatRoomRoutes'));
 
