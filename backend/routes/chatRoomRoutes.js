@@ -37,5 +37,22 @@ router.post('/create', async (req, res) => {
       res.status(500).json({ message: 'Error creating chatroom', error });
    }
 });
+// verify password
+router.post('/verify-password', async (req, res) => {
+   const { chatroomId, password } = req.body;
+
+   try {
+      const chatroom = await Chatroom.findById(chatroomId);
+
+      if (chatroom.password === password) {
+         res.json({ success: true });
+      } else {
+         res.json({ success: false });
+      }
+   } catch (error) {
+      console.error('Error verifying password:', error);
+      res.status(500).json({ message: 'Error verifying password', error });
+   }
+});   
 
 module.exports = router;

@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/signup', async (req, res) => {
    console.log('Signup === ' + req.body);
    try {
-      const { email, password, userName } = req.body;
+      const { email, password, userName, profilePic } = req.body;
 
       // Validate input
       if (!email || !password || !userName) {
@@ -24,8 +24,7 @@ router.post('/signup', async (req, res) => {
       // Hash the password
       const hashedPassword = await bcrypt.hash(password, parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10);
 
-      // Create new user
-      const newUser = new User({ email, password: hashedPassword, userName });
+      const newUser = new User({ email, password: hashedPassword, userName, profilePic });
       await newUser.save();
 
       // Return success response
@@ -70,8 +69,9 @@ router.post('/login', async (req, res) => {
             _id: user._id,
             userName: user.userName,
             email: user.email,
+            profilePic: user.profilePic, // Include profile picture in the response
          },
-         token, // Optional if using JWT
+         token, // Optional, for authentication
       });
    } catch (error) {
       console.error('Error during login:', error);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Tabs, Form, Input, Button, Typography, message } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useChatContext } from '../contexts/ChatContexts';
 
 const { TabPane } = Tabs;
 const { Link } = Typography;
@@ -9,6 +10,7 @@ const { Link } = Typography;
 const Login = () => {
    const [activeTab, setActiveTab] = useState('login');
    const navigate = useNavigate();
+   const { login } = useChatContext();
 
    const handleTabChange = key => {
       setActiveTab(key);
@@ -19,8 +21,7 @@ const Login = () => {
          const response = await axios.post('http://localhost:5000/api/auth/login', values);
          console.log('Login Response: ', response);
          const { user, token } = response.data;
-         localStorage.setItem('userId', user._id); // Store user ID
-         localStorage.setItem('userName', user.userName); // Store userName
+         login(user._id, user.userName, user.email, user.profilePic); // Update context with profile picture
          localStorage.setItem('token', token); // Optional, for authentication
          message.success('Login successful!');
          navigate('/chat'); // Redirect to chat page
